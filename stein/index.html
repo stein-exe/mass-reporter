@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mass Reporter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Serif+4:opsz,wght@8..60,400;700&family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&family=IBM+Plex+Mono:wght@400;700&family=Fraunces:opsz,wght@9..144,400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="/favicon.jpg" type="image/jpeg">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="theme-obsidian font-editorial radius-sharp space-comfortable">
+
+  <!-- Background Layer -->
+  <div class="bg-layer" id="bgLayer" aria-hidden="true"></div>
+
+  <!-- Scroll Progress -->
+  <div id="scrollProgress" class="scroll-progress" aria-hidden="true"></div>
+
+  <!-- Mobile Header -->
+  <div class="mobile-header">
+    <span class="mobile-logo">MASS REPORTER</span>
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="app-sidebar" id="appSidebar">
+    <div class="sidebar-brand">MASS<br>REPORTER</div>
+    <nav class="sidebar-nav" aria-label="Main">
+      <button class="nav-item" data-tab="manual">Manual</button>
+      <button class="nav-item" data-tab="help">Help</button>
+      <button class="nav-item" data-tab="proxies">Proxies</button>
+      <button class="nav-item" data-tab="session-manager">Session Manager</button>
+      <button class="nav-item" data-tab="method">Method</button>
+      <button class="nav-item active" data-tab="workflow">Workflow</button>
+      <button class="nav-item" data-tab="console">Console</button>
+      <button class="nav-item" data-tab="disclaimer">Disclaimer</button>
+      <button class="nav-item" data-tab="credits">Credits</button>
+    </nav>
+    <div class="sidebar-footer">
+      <p class="disclaimer-line">By using this tool you agree to our <button class="link-btn" data-tab="disclaimer">Disclaimer</button></p>
+      <span class="version">v2.0</span>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="app-main">
+
+    <!-- Manual Tab -->
+    <section id="tab-manual" class="app-tab" aria-label="Manual">
+      <header class="tab-header">
+        <h1>Operations Manual</h1>
+        <p class="muted">Common questions, answered directly.</p>
+      </header>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>What is a session ID and where do I get it?<span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body"><div class="faq-inner">Your Instagram <code>sessionid</code> cookie. Extract it from your browser's developer tools under Application &rarr; Cookies. Then paste it into <button class="link-btn" data-tab="session-manager">Session Manager</button> or directly into the <button class="link-btn" data-tab="workflow">Workflow</button> sessions panel.</div></div>
+        </details>
+        <details class="faq-item">
+          <summary>Why are my proxies not working?<span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body"><div class="faq-inner">This tool does not validate proxy format. Ensure your proxies are active and reachable. Enable "Retry with own IP" in the <button class="link-btn" data-tab="proxies">Proxies</button> tab to fallback.</div></div>
+        </details>
+        <details class="faq-item">
+          <summary>How does validation remove dead sessions?<span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body"><div class="faq-inner">Validation checks each session against Instagram. Invalid sessions are stripped from the textarea and removed from <code>sessions_data.json</code> automatically. Use the <button class="link-btn" data-tab="session-manager">Session Manager</button> to review what remains.</div></div>
+        </details>
+        <details class="faq-item">
+          <summary>Can I use the same session multiple times?<span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body"><div class="faq-inner">Duplicates are automatically deduplicated when saving. Each unique session is stored once. The <button class="link-btn" data-tab="session-manager">Session Manager</button> shows only unique entries.</div></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Help Tab -->
+    <section id="tab-help" class="app-tab" aria-label="Help">
+      <header class="tab-header">
+        <h1>Help</h1>
+        <p class="muted">Getting started and troubleshooting.</p>
+      </header>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>Step 1 — Load Sessions<span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body"><div class="faq-inner">Paste your Instagram sessionid cookies into the <button class="link-btn" data-tab="session-manager">Session Manager</button>. One per line. Click Save to write them to <code>sessions.txt</code>, then switch to <button class="link-btn" data-tab="workflow">Workflow</button> and click Validate to purge dead sessions automatically.</div></div>
+        </details>
+        <details class="faq-item">
+          <summary>Step 2 — Configure Target<span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body"><div class="faq-inner">Enter the target username or paste a full Instagram link in the <button class="link-btn" data-tab="workflow">Workflow</button> Target panel. Click Fetch Info to preview the account. Load your proxies in the <button class="link-btn" data-tab="proxies">Proxies</button> tab if you want IP rotation.</div></div>
+        </details>
+        <details class="faq-item">
+          <summary>Step 3 — Fire<span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body"><div class="faq-inner">Build your reporting sequence in the <button class="link-btn" data-tab="method">Method</button> tab. Pick a report type, set a repeat count, and add it to the sequence. You cannot add the same report twice in a row. When ready, switch to <button class="link-btn" data-tab="workflow">Workflow</button> and click Start Reporting. Live output appears in the <button class="link-btn" data-tab="console">Console</button> tab.</div></div>
+        </details>
+        <details class="faq-item">
+          <summary>Proxies<span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body"><div class="faq-inner">If you enable proxies in the <button class="link-btn" data-tab="proxies">Proxies</button> tab, the tool will pick one at random for each request. If a proxy fails, the tool can fall back to your own IP if "Retry with own IP" is enabled.</div></div>
+        </details>
+        <details class="faq-item">
+          <summary>My reports return "Request failed"<span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body"><div class="faq-inner">Instagram rate-limits aggressively. Spread sessions across longer intervals, rotate proxies, and ensure your sessions are freshly extracted from logged-in browsers.</div></div>
+        </details>
+        <details class="faq-item">
+          <summary>Instagram blocks my IP<span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body"><div class="faq-inner">Use the <button class="link-btn" data-tab="proxies">Proxies</button> tab to load a rotating proxy list. Enable "Retry with own IP" as a safety net, but your real IP may still be flagged. High-quality residential proxies are recommended.</div></div>
+        </details>
+        <details class="faq-item">
+          <summary>Validation says all sessions are invalid<span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body"><div class="faq-inner">Sessions expire quickly. Re-extract them from an active, logged-in Instagram browser tab. Sessions from incognito or expired logins will always fail. Remove dead ones in <button class="link-btn" data-tab="session-manager">Session Manager</button> and add fresh ones.</div></div>
+        </details>
+        <details class="faq-item">
+          <summary>Can I use this without proxies?<span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body"><div class="faq-inner">Yes. Turn off "Use Proxies" in the <button class="link-btn" data-tab="proxies">Proxies</button> tab. Your own IP will be used for every request. Best for small batches or testing.</div></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Proxies Tab -->
+    <section id="tab-proxies" class="app-tab" aria-label="Proxies">
+      <header class="tab-header">
+        <h1>Proxies</h1>
+        <p class="muted">Configure your proxy rotation.</p>
+      </header>
+      <div class="proxies-panel">
+        <label for="proxyList">Proxy List</label>
+        <textarea id="proxyList" rows="12" placeholder="1.2.3.4:8080&#10;user:pass@1.2.3.4:8080"></textarea>
+        <button id="btnSaveProxies" class="btn-secondary">Save Proxies</button>
+        <p id="proxySaveStatus" class="hint"></p>
+
+        <div class="toggles" style="margin-top:1.5rem">
+          <div class="toggle-row">
+            <span>Use Proxies</span>
+            <label class="switch"><input id="useProxies" type="checkbox"><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row hidden" id="retryWrap">
+            <span>Retry with own IP</span>
+            <label class="switch"><input id="retryOwn" type="checkbox" checked><span class="slider"></span></label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Session Manager Tab -->
+    <section id="tab-session-manager" class="app-tab" aria-label="Session Manager">
+      <header class="tab-header">
+        <h1>Session Manager</h1>
+        <p class="muted">Review, add, and remove sessions.</p>
+      </header>
+
+      <div class="session-panels">
+        <div class="session-panel">
+          <div class="session-panel-head">
+            <span class="session-panel-icon" aria-hidden="true">KEY</span>
+            <div>
+              <h4>Paste Session ID</h4>
+              <p class="session-panel-desc">Add an existing <code>sessionid</code> cookie manually.</p>
+            </div>
+          </div>
+          <label for="newSessionId">Session ID</label>
+          <input id="newSessionId" type="text" placeholder="sessionid_..." autocomplete="off">
+          <button id="btnAddSession" class="btn-secondary session-panel-btn">Add to Vault</button>
+          <p id="addSessionStatus" class="session-status" role="status"></p>
+        </div>
+
+        <div class="session-panel session-panel--login">
+          <div class="session-panel-head">
+            <span class="session-panel-icon session-panel-icon--ig" aria-hidden="true">IG</span>
+            <div>
+              <h4>Login with Instagram</h4>
+              <p class="session-panel-desc">Use your plain username and password — do not include <code>@</code>.</p>
+            </div>
+          </div>
+          <div class="session-fields">
+            <div class="session-field">
+              <label for="igLoginUser">Username</label>
+              <input id="igLoginUser" type="text" placeholder="username" autocomplete="username" spellcheck="false">
+            </div>
+            <div class="session-field">
+              <label for="igLoginPass">Password</label>
+              <input id="igLoginPass" type="password" placeholder="Password" autocomplete="current-password">
+            </div>
+          </div>
+          <button id="btnIgLogin" class="btn-accent session-panel-btn">Login &amp; Add to Vault</button>
+          <p id="igLoginStatus" class="session-status hidden" role="alert"></p>
+        </div>
+      </div>
+
+      <div class="session-table-wrap">
+        <table class="session-table" id="sessionTable">
+          <thead>
+            <tr>
+              <th>Session</th>
+              <th>Username</th>
+              <th>Name</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="sessionTableBody"></tbody>
+        </table>
+        <p id="sessionTableEmpty" class="hint" style="text-align:center;padding:1.5rem 0">No sessions in vault.</p>
+      </div>
+    </section>
+
+    <!-- Method Tab -->
+    <section id="tab-method" class="app-tab" aria-label="Method">
+      <header class="tab-header">
+        <h1>Method Builder</h1>
+        <p class="muted">Assemble your reporting sequence step by step.</p>
+      </header>
+
+      <div class="method-builder">
+        <div class="method-sequence-box">
+          <h4>Current Sequence</h4>
+          <div id="methodSequenceDisplay" class="method-pills">
+            <span class="method-placeholder">No steps yet. Enter a repeat count below to start.</span>
+          </div>
+          <div class="method-actions">
+            <button id="btnClearSequence" class="btn-secondary">Clear</button>
+            <button id="btnDoneSequence" class="btn-accent">Done</button>
+          </div>
+          <p id="methodStatus" class="hint"></p>
+        </div>
+
+        <div class="method-add-box">
+          <h4>Add Step</h4>
+          <div class="method-input-row">
+            <label for="methodCount">Repeat</label>
+            <input id="methodCount" type="number" min="1" max="99" value="1" placeholder="1">
+          </div>
+
+          <div class="method-categories hidden" id="methodCategories">
+            <!-- Categories rendered by JS when count is set -->
+          </div>
+          <p id="methodCategoriesHint" class="hint" style="margin-top:0.5rem">Type a number above to open the category list.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Workflow Tab -->
+    <section id="tab-workflow" class="app-tab active" aria-label="Workflow">
+      <header class="tab-header">
+        <h1>Mass Reporter</h1>
+        <p class="muted">Batch reporting console.</p>
+      </header>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <span class="stat-value" id="statSessions">0</span>
+          <span class="stat-label">Sessions Loaded</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-value" id="statProxies">0</span>
+          <span class="stat-label">Proxies Active</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-value" id="statValid">0</span>
+          <span class="stat-label">Valid Sessions</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-value" id="statReports">0</span>
+          <span class="stat-label">Reports Fired</span>
+        </div>
+      </div>
+
+      <!-- Steps -->
+      <div class="steps-grid">
+        <!-- Step 1 -->
+        <div class="step-box">
+          <div class="step-badge">01</div>
+          <h3>Sessions</h3>
+          <label for="sessionList">Session IDs</label>
+          <textarea id="sessionList" rows="8" placeholder="sessionid_abc..."></textarea>
+          <div class="step-actions">
+            <button id="btnSaveSessions" class="btn-secondary">Save</button>
+            <button id="btnValidate">Validate</button>
+          </div>
+          <p id="sessionSaveStatus" class="hint"></p>
+
+          <div id="validateResult" class="validate-result hidden">
+            <div class="vr-grid">
+              <div class="vr-cell"><span>Total</span><b id="vrTotal">0</b></div>
+              <div class="vr-cell"><span>Valid</span><b id="vrValid" class="ok">0</b></div>
+              <div class="vr-cell"><span>Invalid</span><b id="vrInvalid" class="err">0</b></div>
+            </div>
+            <p class="vr-msg">Invalid sessions removed.</p>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-box">
+          <div class="step-badge">02</div>
+          <h3>Target</h3>
+
+          <label for="targetUser">Username or Link</label>
+          <input id="targetUser" type="text" placeholder="@username or instagram.com/..." autocomplete="off">
+          <button id="btnFetchInfo" class="btn-secondary" style="margin-top:0.5rem">Fetch Info</button>
+
+          <div id="userInfo" class="user-card hidden">
+            <div class="pfp-wrap" id="pfpWrap">
+              <img id="userPfp" class="pfp" alt="Profile picture" src="" style="display:none" referrerpolicy="no-referrer" crossorigin="anonymous">
+              <div id="pfpInitials" class="pfp-initials hidden" aria-hidden="true"></div>
+            </div>
+            <div class="user-details">
+              <p class="uname" id="userName"></p>
+              <p class="fname" id="userFullName"></p>
+              <p class="meta" id="userMeta1"></p>
+              <p class="meta" id="userMeta2"></p>
+              <p class="meta" id="userMeta3"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-box">
+          <div class="step-badge">03</div>
+          <h3>Execute</h3>
+          <label>Method Sequence</label>
+          <div id="workflowMethodDisplay" class="workflow-method-display">
+            <span class="method-placeholder">No method configured. Go to <button class="link-btn" data-tab="method">Method</button> to build one.</span>
+          </div>
+          <p class="proxy-status" id="proxyStatus">Proxies: Off</p>
+          <div class="thread-row">
+            <label for="threadCount">Threads</label>
+            <input id="threadCount" type="number" min="1" max="50" value="10" title="Max concurrent sessions / report jobs">
+          </div>
+          <div id="reportAlert" class="report-alert hidden" role="alert"></div>
+          <button id="btnStartReport" class="btn-accent" style="margin-top:0.75rem">Start Reporting</button>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-box">
+          <div class="step-badge">04</div>
+          <h3>Config</h3>
+          <div class="config-list" id="configList">
+            <div class="config-row"><span>Proxies</span><b id="cfgProxies">Off</b></div>
+            <div class="config-row hidden" id="cfgRetryRow"><span>Retry with own IP</span><b id="cfgRetry">Yes</b></div>
+            <div class="config-row"><span>Sessions</span><b id="cfgSessions">0</b></div>
+            <div class="config-row"><span>Valid</span><b id="cfgValid">0</b></div>
+            <div class="config-row"><span>Method</span><b id="cfgMethod">None</b></div>
+        <div class="config-row"><span>Steps</span><b id="cfgSteps">0</b></div>
+        <div class="config-row"><span>Threads</span><b id="cfgThreads">10</b></div>
+        <div class="config-row"><span>Proxies Loaded</span><b id="cfgProxyCount">0</b></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Console Tab -->
+    <section id="tab-console" class="app-tab" aria-label="Console">
+      <header class="tab-header">
+        <h1>Console</h1>
+        <p class="muted">Live reporting output.</p>
+      </header>
+      <div class="console-wrap" id="consoleOutput">
+        <div class="console-placeholder">No active run. Start reporting from Workflow to see live output here.</div>
+      </div>
+      <button id="btnClearConsole" class="btn-secondary" style="margin-top:1rem">Clear Console</button>
+    </section>
+
+    <!-- Disclaimer Tab -->
+    <section id="tab-disclaimer" class="app-tab" aria-label="Disclaimer">
+      <header class="tab-header">
+        <h1>Disclaimer</h1>
+        <p class="muted">Terms of use.</p>
+      </header>
+      <div class="plain-panel">
+        <p>This tool is provided for educational and research purposes only. By using Mass Reporter, you acknowledge that:</p>
+        <ul>
+          <li>You are solely responsible for how you use this software.</li>
+          <li>We do not encourage, condone, or support harassment, abuse, or unauthorized reporting of accounts.</li>
+          <li>Instagram's terms of service apply to all actions performed through this tool.</li>
+          <li>Your sessions and proxies are stored locally on your machine. We do not collect, transmit, or sell your data.</li>
+          <li>The authors assume no liability for any consequences resulting from the use of this tool.</li>
+        </ul>
+        <p>If you do not agree with these terms, discontinue use immediately.</p>
+      </div>
+    </section>
+
+    <!-- Credits Tab -->
+    <section id="tab-credits" class="app-tab" aria-label="Credits">
+      <header class="tab-header">
+        <h1>Credits</h1>
+        <p class="muted">Built with precision.</p>
+      </header>
+      <div class="plain-panel">
+        <p><strong>Mass Reporter</strong> — Precision batch reporting infrastructure.</p>
+        <p>Engineered for scale, designed for impact.</p>
+
+        <div style="border-top:1px solid var(--border); margin:1.5rem 0;"></div>
+
+        <p><strong>About the Developer</strong></p>
+        <p>Developed by <strong>Stein</strong>, an 18-year-old software engineer from Haryana, India.</p>
+        <p>Thank you for your purchase. This copy of Mass Reporter is licensed to you and includes automatic updates to ensure you always have the latest features and improvements.</p>
+        <p>Your feedback is invaluable. If you encounter any issues or have suggestions, please reach out — I am committed to resolving bugs and continuously refining this tool.</p>
+
+        <p style="margin-top:1rem;"><strong>Contact &amp; Support</strong></p>
+        <ul>
+          <li>Telegram: <a href="https://t.me/rejerk" target="_blank" rel="noopener noreferrer" style="color:var(--accent); font-weight:700; text-decoration:none;">@rejerk</a></li>
+          <li>Community Group: <a href="https://t.me/keped" target="_blank" rel="noopener noreferrer" style="color:var(--accent); font-weight:700; text-decoration:none;">@keped</a></li>
+          <li>GitHub: <a href="https://github.com/stein-exe" target="_blank" rel="noopener noreferrer" style="color:var(--accent); font-weight:700; text-decoration:none;">stein-exe</a></li>
+        </ul>
+
+        <p style="margin-top:1.5rem; color: var(--text-muted);">Version 2.0</p>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">— Stein</p>
+      </div>
+    </section>
+
+    <!-- Logs Tab -->
+    <section id="tab-logs" class="app-tab" aria-label="Logs">
+      <header class="tab-header">
+        <h1>Operation Logs</h1>
+        <p class="muted">History of every action.</p>
+      </header>
+      <div class="logs-wrap" id="logsList">
+        <div class="feed-placeholder">No operations recorded yet. Execute a report to populate the log.</div>
+      </div>
+      <button id="btnClearLogs" class="btn-secondary" style="margin-top:1rem">Clear History</button>
+    </section>
+  </main>
+
+  <!-- Theme Panel Toggle -->
+  <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Open theme panel">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m16.24-5.24l-4.24 4.24m-6 6l-4.24 4.24m0-14.48l4.24 4.24m6 6l4.24 4.24"/></svg>
+  </button>
+
+  <!-- Support FAB & Popover -->
+  <button class="support-fab" id="supportFab" aria-label="Open support">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+  </button>
+  <div class="support-popover" id="supportPopover" hidden>
+    <p>Need help?</p>
+    <a href="https://t.me/rejerk" target="_blank" rel="noopener noreferrer">Stein on Telegram</a>
+    <button id="closeSupportPopover" aria-label="Close support">&times;</button>
+  </div>
+
+  <!-- Theme Panel -->
+  <aside class="theme-panel" id="themePanel" aria-label="Theme settings">
+    <div class="theme-panel-header">
+      <h3>Settings</h3>
+      <button id="closeThemePanel" aria-label="Close theme panel">&times;</button>
+    </div>
+    <div class="theme-panel-body">
+      <div class="tp-section">
+        <h4>Theme</h4>
+        <div class="tp-grid">
+          <button class="tp-theme-btn active" data-theme="obsidian">Obsidian</button>
+          <button class="tp-theme-btn" data-theme="paper">Paper</button>
+          <button class="tp-theme-btn" data-theme="forest">Forest</button>
+          <button class="tp-theme-btn" data-theme="neon-noir">Neon Noir</button>
+          <button class="tp-theme-btn" data-theme="dust">Dust</button>
+          <button class="tp-theme-btn" data-theme="arctic">Arctic</button>
+        </div>
+      </div>
+      <div class="tp-section">
+        <h4>Typography</h4>
+        <div class="tp-grid">
+          <button class="tp-font-btn active" data-font="editorial">Editorial</button>
+          <button class="tp-font-btn" data-font="modern">Modern</button>
+          <button class="tp-font-btn" data-font="mono">Mono</button>
+          <button class="tp-font-btn" data-font="humanist">Humanist</button>
+        </div>
+      </div>
+      <div class="tp-section">
+        <h4>Border Radius</h4>
+        <div class="tp-segment">
+          <button class="tp-radius-btn active" data-radius="sharp">Sharp</button>
+          <button class="tp-radius-btn" data-radius="rounded">Rounded</button>
+          <button class="tp-radius-btn" data-radius="pill">Pill</button>
+        </div>
+      </div>
+      <div class="tp-section">
+        <h4>Spacing</h4>
+        <div class="tp-segment">
+          <button class="tp-space-btn active" data-space="compact">Compact</button>
+          <button class="tp-space-btn" data-space="comfortable">Comfortable</button>
+          <button class="tp-space-btn" data-space="spacious">Spacious</button>
+        </div>
+      </div>
+      <div class="tp-section">
+        <h4>Animations</h4>
+        <div class="tp-segment">
+          <button class="tp-anim-btn active" data-anim="on">On</button>
+          <button class="tp-anim-btn" data-anim="off">Off</button>
+        </div>
+      </div>
+      <div class="tp-section">
+        <h4>Background</h4>
+        <div class="tp-segment">
+          <button class="tp-bg-btn active" data-bg="off">Off</button>
+          <button class="tp-bg-btn" data-bg="on">On</button>
+        </div>
+      </div>
+      <div class="tp-section">
+        <h4>Accent Color</h4>
+        <div class="tp-swatches">
+          <button class="tp-swatch" style="background:#d4a017" data-color="#d4a017" aria-label="Amber"></button>
+          <button class="tp-swatch" style="background:#ff4400" data-color="#ff4400" aria-label="Blaze"></button>
+          <button class="tp-swatch" style="background:#00e676" data-color="#00e676" aria-label="Emerald"></button>
+          <button class="tp-swatch" style="background:#00d4ff" data-color="#00d4ff" aria-label="Cyan"></button>
+          <button class="tp-swatch" style="background:#d500f9" data-color="#d500f9" aria-label="Violet"></button>
+          <button class="tp-swatch" style="background:#ff1744" data-color="#ff1744" aria-label="Crimson"></button>
+          <button class="tp-swatch" style="background:#2979ff" data-color="#2979ff" aria-label="Azure"></button>
+          <button class="tp-swatch" style="background:#76ff03" data-color="#76ff03" aria-label="Lime"></button>
+        </div>
+        <input type="text" id="accentHex" placeholder="#d4a017" maxlength="7" class="tp-hex">
+      </div>
+    </div>
+  </aside>
+
+  <!-- Back to top -->
+  <button id="backToTop" class="back-to-top" aria-label="Back to top" hidden>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+  </button>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
