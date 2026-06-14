@@ -1199,6 +1199,30 @@ input:checked + .slider::before { transform:translateX(22px); background:#fff; }
 }
 .method-item-name { font-size:0.82rem; font-weight:700; }
 
+.method-item-expand {
+  background:var(--surface-3); border:1px solid var(--border);
+}
+.method-item-expand summary {
+  display:flex; align-items:center; gap:0.6rem;
+  padding:0.55rem 0.7rem; cursor:pointer; list-style:none;
+}
+.method-item-expand summary::-webkit-details-marker { display:none; }
+.method-item-expand-body {
+  display:flex; flex-direction:column; gap:0.5rem;
+  padding:0 0.7rem 0.7rem;
+  border-top:1px solid var(--border);
+}
+.method-victim-label {
+  font-size:0.72rem; text-transform:uppercase; letter-spacing:0.5px;
+  color:var(--text-muted); font-weight:700; margin-top:0.55rem;
+}
+.method-victim-input {
+  width:100%; background:var(--surface); border:1px solid var(--border);
+  color:var(--text); padding:0.5rem 0.65rem; font-family:var(--font-body); font-size:0.85rem;
+}
+.method-item-add { width:100%; justify-content:center; margin-top:0.15rem; }
+.method-victim { color:var(--text-muted); font-weight:600; }
+
 /* ---------- Reduced Motion ---------- */
 @media (prefers-reduced-motion:reduce) {
   * { transition:none !important; animation:none !important; }
