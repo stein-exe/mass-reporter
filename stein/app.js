@@ -245,7 +245,7 @@ function updateConfigDisplay() {
 
   const seq = methodSequence;
   const methodLabel = seq.length
-    ? seq.map((s) => `${s.count}x ${s.label}`).join(' \u2192 ')
+    ? seq.map((s) => formatStepLabel(s)).join(' \u2192 ')
     : 'None';
 
   $('cfgProxies').textContent = useProxies ? 'On' : 'Off';
@@ -262,7 +262,7 @@ function updateConfigDisplay() {
   const wfd = $('workflowMethodDisplay');
   if (wfd) {
     if (seq.length) {
-      wfd.innerHTML = seq.map((s) => `<span class="method-mini-pill">${s.count}x ${s.label}</span>`).join('<span class="method-mini-arrow">\u2192</span>');
+      wfd.innerHTML = seq.map((s) => `<span class="method-mini-pill">${formatStepLabel(s)}</span>`).join('<span class="method-mini-arrow">\u2192</span>');
     } else {
       wfd.innerHTML = '<span class="method-placeholder">No method configured. Go to <button class="link-btn" data-tab="method">Method</button> to build one.</span>';
     }
@@ -467,12 +467,63 @@ async function runTaskPool(tasks, concurrency, worker) {
   await Promise.all(Array.from({ length: limit }, runWorker));
 }
 
+const REPORT_IDS_NEEDING_VICTIM = new Set(['report_impersonate']);
+
+function formatStepLabel(step) {
+  let text = `${step.count}x ${step.label}`;
+  if (step.victim_username) text += ` (@${step.victim_username})`;
+  return text;
+}
+
+function methodItemNeedsVictim(item) {
+  return Boolean(item.needsVictim || REPORT_IDS_NEEDING_VICTIM.has(item.id));
+}
+
+function renderMethodItem(it) {
+  if (methodItemNeedsVictim(it)) {
+    return `
+      <details class="method-item-expand">
+        <summary>
+          <span class="method-cat-arrow" aria-hidden="true">\u25B6</span>
+          <span class="method-item-name">${it.label}</span>
+        </summary>
+        <div class="method-item-expand-body">
+          <label class="method-victim-label">Victim username</label>
+          <input
+            type="text"
+            class="method-victim-input"
+            data-id="${it.id}"
+            data-label="${it.label}"
+            placeholder="username or @username"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button type="button" class="method-item-btn method-item-add" data-id="${it.id}" data-label="${it.label}">
+            Add to sequence
+          </button>
+        </div>
+      </details>
+    `;
+  }
+  return `
+    <button type="button" class="method-item-btn" data-id="${it.id}" data-label="${it.label}">
+      <span class="method-item-name">${it.label}</span>
+    </button>
+  `;
+}
+
 function validateReportInputs() {
   const target = extractUsername($('targetUser').value);
   const ids = parseLines($('sessionList').value);
   const seq = methodSequence;
   const errors = [];
   if (!target) errors.push('Enter a target username or Instagram link.');
+  for (const step of seq) {
+    if (REPORT_IDS_NEEDING_VICTIM.has(step.id) && !step.victim_username) {
+      errors.push('An impersonation step is missing a victim username — re-add it in the Method tab.');
+      break;
+    }
+  }
   if (!seq.length) errors.push('Configure a method sequence in the Method tab.');
   if (!ids.length) errors.push('Add and validate at least one session.');
   return { ok: errors.length === 0, errors, target, ids, seq };
@@ -828,6 +879,12 @@ const REPORT_CATEGORIES = [
     ],
   },
   {
+    title: 'Account integrity',
+    items: [
+      { id: 'report_impersonate', label: 'Impersonation', needsVictim: true },
+    ],
+  },
+  {
     title: 'Scam / fraud',
     items: [
       { id: 'report_scam_financial', label: 'Financial / investment scam' },
@@ -857,28 +914,50 @@ function renderMethodCategories() {
     <details class="method-cat">
       <summary><span class="method-cat-arrow" aria-hidden="true">\u25B6</span>${cat.title}</summary>
       <div class="method-cat-body">
-        ${cat.items.map((it) => `
-          <button class="method-item-btn" data-id="${it.id}" data-label="${it.label}">
-            <span class="method-item-name">${it.label}</span>
-          </button>
-        `).join('')}
+        ${cat.items.map((it) => renderMethodItem(it)).join('')}
       </div>
     </details>
   `).join('');
 
-  container.querySelectorAll('.method-item-btn').forEach((btn) => {
+  container.querySelectorAll('.method-item-btn:not(.method-item-add)').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const id = btn.dataset.id;
-      const label = btn.dataset.label;
-      addMethodStep(id, label);
+      addMethodStep(btn.dataset.id, btn.dataset.label);
     });
   });
 
-  // Rotate arrow on open/close
-  container.querySelectorAll('.method-cat').forEach((details) => {
-    const arrow = details.querySelector('.method-cat-arrow');
+  container.querySelectorAll('.method-item-add').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const body = btn.closest('.method-item-expand-body');
+      const input = body?.querySelector('.method-victim-input');
+      const victim = extractUsername(input?.value || '');
+      const status = $('methodStatus');
+      if (!victim) {
+        if (status) {
+          status.textContent = 'Enter the victim username (with or without @).';
+          status.className = 'hint err';
+        }
+        input?.focus();
+        return;
+      }
+      addMethodStep(btn.dataset.id, btn.dataset.label, victim);
+      if (input) input.value = '';
+    });
+  });
+
+  container.querySelectorAll('.method-victim-input').forEach((input) => {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        input.closest('.method-item-expand-body')?.querySelector('.method-item-add')?.click();
+      }
+    });
+  });
+
+  container.querySelectorAll('.method-cat, .method-item-expand').forEach((details) => {
+    const arrow = details.querySelector(':scope > summary .method-cat-arrow');
+    if (!arrow) return;
     details.addEventListener('toggle', () => {
-      if (arrow) arrow.textContent = details.open ? '\u25BC' : '\u25B6';
+      arrow.textContent = details.open ? '\u25BC' : '\u25B6';
     });
   });
 }
@@ -906,7 +985,7 @@ function renderMethodSequence() {
   }
   display.innerHTML = methodSequence.map((s, i) => `
     <span class="method-pill">
-      <b>${s.count}x</b> ${s.label}
+      <b>${s.count}x</b> ${s.label}${s.victim_username ? ` <span class="method-victim">(@${s.victim_username})</span>` : ''}
       <button class="method-pill-remove" data-idx="${i}" aria-label="Remove step">\u00D7</button>
     </span>
   `).join('<span class="method-arrow">\u2192</span>');
@@ -916,14 +995,16 @@ function renderMethodSequence() {
   });
 }
 
-function addMethodStep(id, label) {
+function addMethodStep(id, label, victimUsername = '') {
   const countEl = $('methodCount');
   const count = Math.max(1, Math.min(99, parseInt(countEl?.value || '1', 10)));
   const status = $('methodStatus');
+  const victim = extractUsername(victimUsername || '');
 
   if (methodSequence.length) {
     const last = methodSequence[methodSequence.length - 1];
-    if (last.id === id) {
+    const sameVictim = !REPORT_IDS_NEEDING_VICTIM.has(id) || last.victim_username === victim;
+    if (last.id === id && sameVictim) {
       if (status) {
         status.textContent = 'Cannot add the same report consecutively. Pick a different one.';
         status.className = 'hint err';
@@ -932,12 +1013,25 @@ function addMethodStep(id, label) {
     }
   }
 
-  methodSequence.push({ id, label, count });
+  const step = { id, label, count };
+  if (REPORT_IDS_NEEDING_VICTIM.has(id)) {
+    if (!victim) {
+      if (status) {
+        status.textContent = 'Victim username is required for impersonation.';
+        status.className = 'hint err';
+      }
+      return;
+    }
+    step.victim_username = victim;
+  }
+
+  methodSequence.push(step);
   saveMethodSequence();
   renderMethodSequence();
   updateConfigDisplay();
   if (status) {
-    status.textContent = `Added ${count}x ${label}.`;
+    const victimNote = step.victim_username ? ` (@${step.victim_username})` : '';
+    status.textContent = `Added ${count}x ${label}${victimNote}.`;
     status.className = 'hint ok';
   }
 }
@@ -1086,6 +1180,7 @@ async function doReport() {
           sessionId: sid,
           reportId: step.id,
           reportLabel: step.label,
+          victimUsername: step.victim_username || '',
         });
       }
     }
@@ -1098,7 +1193,7 @@ async function doReport() {
   clearConsole();
   switchTab('console');
 
-  const seqSummary = seq.map((s) => `${s.count}x ${s.label}`).join(' \u2192 ');
+  const seqSummary = seq.map((s) => formatStepLabel(s)).join(' \u2192 ');
   appendConsole(
     `<strong>Starting</strong> ${seqSummary} against <span class="target">@${target}</span> \u00B7 ${pluralize(ids.length, 'session')} \u00B7 ${threads} thread${threads !== 1 ? 's' : ''} \u00B7 ${pluralize(tasks.length, 'job')}`,
     'info'
@@ -1110,16 +1205,22 @@ async function doReport() {
   await runTaskPool(tasks, threads, async (task) => {
     const meta = sessionMap[task.sessionId];
     const reporter = meta?.username || previewSession(task.sessionId);
+    const victimNote = task.victimUsername ? ` <span class="by">impersonating @${task.victimUsername}</span>` : '';
     appendConsole(
-      `[${task.sessionIndex}/${ids.length}] <span class="by">${task.reportLabel}</span> \u2192 @${target} <span class="by">via</span> @${reporter} <span class="by">\u2026</span>`,
+      `[${task.sessionIndex}/${ids.length}] <span class="by">${task.reportLabel}</span>${victimNote} \u2192 @${target} <span class="by">via</span> @${reporter} <span class="by">\u2026</span>`,
       'info'
     );
 
-    const result = await post(task.reportId, {
+    const postBody = {
       username: target,
       sessionid: task.sessionId,
       ...proxyOpts,
-    });
+    };
+    if (task.victimUsername) {
+      postBody.victim_username = task.victimUsername;
+    }
+
+    const result = await post(task.reportId, postBody);
 
     const success = result === true;
     const line = `[${task.sessionIndex}/${ids.length}] <span class="target">@${target}</span> <span class="by">[${task.reportLabel}]</span> <span class="by">by</span> <span class="reporter">@${reporter}</span>`;
